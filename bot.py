@@ -3,8 +3,8 @@ import random
 from discord.ext import commands
 
 intents = discord.Intents(messages=True, guilds=True, reactions=True, members=True, presences=True)
-# Prefix for commands!
-client = commands.Bot(command_prefix=".", intents=intents)
+
+client = commands.Bot(command_prefix='.', intents=intents)
 
 
 # Lets you know if bot is Running!
