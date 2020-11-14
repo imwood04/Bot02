@@ -1,0 +1,27 @@
+Metadata-Version: 2.1
+Name: rule34
+Version: 1.7.4
+Summary: An async API wrapper for rule34.xxx
+Home-page: https://github.com/LordOfPolls/Rule34-API-Wrapper
+Author: LordOfPolls
+Author-email: ddavidallen13@gmail.com
+License: MIT
+Project-URL: Source, https://github.com/LordOfPolls/Rule34-API-Wrapper
+Keywords: rule34,porn,api,wrapper
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Build Tools
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Requires-Python: >=3.5
+Description-Content-Type: text/markdown
+Requires-Dist: asyncio
+Requires-Dist: aiohttp
+
+An async API wrapper for rule34.xxx using aiohttp
+
+
