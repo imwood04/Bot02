@@ -3,6 +3,3 @@ PyNaCl==1.4.0
 async-timeout==3.0.1
 rule34~=1.7.4
 dnspython==2.0.0
-
-# client.run('NjY0MDM3NDYxMjE4ODIwMTA2.XhRPEw.LOwGMDOlV4ugDqRpoV75I6wpDcA')
-# # NjY0MDM3NDYxMjE4ODIwMTA2.XhRPEw.MQ_fgVbcKW_-Tl0Td0rf9Gz5V_Q
