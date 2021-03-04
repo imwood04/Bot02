@@ -21,20 +21,23 @@ async def on_ready():
     print('Logged in as {0.user}'.format(client))
 
 
+# Prints in output when someone joins a server the bot is in
 @client.event
 async def on_member_join(member):
     print(f'{member} Has joined the Server!')
 
 
+# Prints in the output for when someone leaves or get banned/kicked form a server the bot is in
 @client.event
 async def on_member_remove(member):
     print(f'{member} Has left the Server!')
 
 
+# simple error handler for unknown commands
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
-        await ctx.send('Please Type a Valid Command!')
+        await ctx.send('Please Type a Valid Command!', delete_after=5.0)
 
 
 @client.command()
@@ -316,6 +319,7 @@ async def serverinfo(ctx):
     embed.add_field(name="Region", value=region, inline=True)
     embed.add_field(name="Member Count", value=memberCount, inline=True)
     await ctx.send(embed=embed)
+
 
 # TODO Balance Command
 
