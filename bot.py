@@ -136,7 +136,8 @@ async def help(ctx):
                                       "- spank >> ping someone to spank them!\n"
                                       "- hug >> ping someone to hug them!\n"
                                       "- serverinfo >> gives basic server info!\n"
-                                      "- invite >> sends bots invite link",
+                                      "- invite >> sends bots invite link\n"
+                                      "- balance >> Tells You Your Balance!",
                           color=discord.colour.Colour.dark_blue())
     embed.add_field(name="Admin Commands", value="- Purge \n - Kick \n - Ban", inline=False)
     embed.add_field(name="Gambling Commands",
@@ -159,7 +160,8 @@ async def helpError(ctx, error):
                                        "- spank >> ping someone to spank them!\n"
                                        "- hug >> ping someone to give them a hug1\n"
                                        "- serverinfo >> gives basic server info!\n"
-                                       "- invite >> sends bots invite link!",
+                                       "- invite >> sends bots invite link!\n"
+                                       "- balance >> Tells You Your Balance!",
                            color=discord.colour.Colour.dark_blue())
     embed1.set_footer(text="Bot made by: ZeroTwo#8676 ")
 
@@ -262,11 +264,12 @@ async def roulette(ctx):
 
 @client.command()
 @commands.cooldown(1, 5, commands.BucketType.user)
-async def spank(self, ctx, *, member: discord.Member):
+async def spank(ctx, *, member: discord.Member):
     member1 = ctx.message.author
-    diR = "gif\spank"
+    diR = "gif/spank"
     gif = random.choice(os.listdir(diR))
-    with open(f'{dir}\\{gif}', 'rb') as f:
+    with open(f'{diR}\\{gif}', 'rb') as f:
+        await ctx.send(f'{member1} has Spanked {member}')
         await ctx.send(file=File(f))
 
 
