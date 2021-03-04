@@ -316,6 +316,29 @@ async def serverinfo(ctx):
 
 ##TODO Balance Command
 
+@client.command()
+@commands.cooldown(1, 120, commands.BucketType.user)
+async def work(ctx):
+    await open_account(ctx.author)
+    users = await get_bank_data()
+    user = ctx.author
+    wallet_amt = users[str(user.id)]['wallet']
+    if str(user.id) in users:
+        users[str(user.id)]['wallet'] = wallet_amt + random.randint(250, 5000)
+        await ctx.send('You Worked a Successful Shift!')
+    else:
+        return False
+    with open('mainBank.json', 'w') as f:
+        json.dump(users, f)
+    return True
+
+
+@work.error
+async def workError(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.send(f'This command is not ready to use, try again in  %.2f seconds' % error.retry_after)
+        return
+
 
 @client.command(aliases=['bal'])
 async def balance(ctx):
@@ -365,7 +388,7 @@ async def leaderboard(ctx, x=1):
 
     total = sorted(total, reverse=True)
 
-    em = discord.Embed(title=f"Top {x} Richest People",
+    em = discord.Embed(title=f"Top 5 Richest People",
                        description="Top Richest Players in de Bot!",
                        color=discord.Color(0xfa43ee))
     index = 1
@@ -376,9 +399,9 @@ async def leaderboard(ctx, x=1):
         em.add_field(name=f"{index}. {name}", value=f"{amt}", inline=False)
         em.set_footer(text="Bot made by: ZeroTwo#8676")
         if index == x:
-            break
+            index += 5
         else:
-            index += 1
+            index += 5
 
     await ctx.send(embed=em)
 
