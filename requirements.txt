@@ -1,4 +1,4 @@
-git+https://github.com/Rapptz/discord.py@rewrite
+discord.py
 PyNaCl==1.4.0
 async-timeout==3.0.1
 rule34~=1.7.4

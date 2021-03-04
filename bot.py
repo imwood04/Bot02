@@ -111,12 +111,14 @@ async def kick(ctx, *, reason=None):
 @commands.cooldown(1, 5, commands.BucketType.user)
 async def ban(ctx, member: discord.Member, *, reason=None):
     await member.ban(reason=reason)
+    print(f'{member} Was Banned')
+    await ctx.send(f'**{member} was Banned!**')
 
 
 @client.command()
 @commands.has_permissions(ban_members=True)
 @commands.cooldown(1, 5, commands.BucketType.user)
-async def unban(self, ctx, userId):
+async def unban(ctx, userId):
     user = discord.Object(id=userId)
     await ctx.guild.unban(user)
     await ctx.send(f"Unbanned {user}")
@@ -200,12 +202,13 @@ async def coinflip(ctx, *, choice):
 @commands.cooldown(1, 5, commands.BucketType.user)
 async def addrole(ctx, role: discord.Role, user: discord.Member):
     await user.add_roles(role)
+    await ctx.send(f'**{user} was given the {role} role!**', delete_after=5.0)
 
 
 @addrole.error
 async def addroleError(ctx, error):
     if isinstance(error, commands.MissingPermissions):
-        await ctx.send('You do Not have Permission to use this Command!')
+        await ctx.send('You do Not have Permission to use this Command!', delete_after=5.0)
 
 
 @client.command()
@@ -213,6 +216,7 @@ async def addroleError(ctx, error):
 @commands.cooldown(1, 5, commands.BucketType.user)
 async def delrole(ctx, role: discord.Role, user: discord.Member):
     await user.remove_roles(role)
+    await ctx.send(f"**{user}'s {role} was Revoked!**", delete_after=5.0)
 
 
 @delrole.error
@@ -313,8 +317,8 @@ async def serverinfo(ctx):
     embed.add_field(name="Member Count", value=memberCount, inline=True)
     await ctx.send(embed=embed)
 
+# TODO Balance Command
 
-##TODO Balance Command
 
 @client.command()
 @commands.cooldown(1, 120, commands.BucketType.user)
@@ -323,9 +327,10 @@ async def work(ctx):
     users = await get_bank_data()
     user = ctx.author
     wallet_amt = users[str(user.id)]['wallet']
+    new_wall_amt = wallet_amt + random.randint(250, 5000)
     if str(user.id) in users:
-        users[str(user.id)]['wallet'] = wallet_amt + random.randint(250, 5000)
-        await ctx.send('You Worked a Successful Shift!')
+        users[str(user.id)]['wallet'] = new_wall_amt
+        await ctx.send(f'**You Worked a Successful Shift! Your new Balance is {new_wall_amt}!**')
     else:
         return False
     with open('mainBank.json', 'w') as f:
