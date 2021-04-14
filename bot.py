@@ -331,7 +331,7 @@ async def work(ctx):
     users = await get_bank_data()
     user = ctx.author
     wallet_amt = users[str(user.id)]['wallet']
-    new_wall_amt = wallet_amt + random.randint(250, 5000)
+    new_wall_amt = wallet_amt + random.randint(250, 3000)
     if str(user.id) in users:
         users[str(user.id)]['wallet'] = new_wall_amt
         await ctx.send(f'**You Worked a Successful Shift! Your new Balance is {new_wall_amt}!**')
@@ -370,6 +370,7 @@ async def open_account(user):
     if str(user.id) in users:
         return False
     else:
+        print(f'{user.id} Has been added to the Bank!')
         users[str(user.id)] = {}
         users[str(user.id)]['wallet'] = 0
         users[str(user.id)]['bank'] = 0
