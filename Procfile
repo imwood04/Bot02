@@ -1,2 +1,1 @@
-ECHO is on.
-worker: bot.py
+worker: python bot.py
