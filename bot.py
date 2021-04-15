@@ -190,7 +190,7 @@ async def avatarError(ctx, error):
 
 
 @client.command(aliases=['cf'])
-# @commands.cooldown(1, 5, commands.BucketType.user)
+@commands.cooldown(1, 5, commands.BucketType.user)
 async def coinflip(ctx, *, choice):
     HorT = ['Heads', 'Tails']
     random_response = random.choice(HorT)
@@ -198,6 +198,12 @@ async def coinflip(ctx, *, choice):
         await ctx.send(f'You Won! it was {random_response}')
     else:
         await ctx.send(f'You Lost! it was {random_response}')
+
+
+@coinflip.error
+async def coinflipError(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send('Please Choose Heads or Tails')
 
 
 @client.command()
