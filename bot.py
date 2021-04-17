@@ -1,426 +1,194 @@
+# Standard libraries
+import contextlib
+import io
 import os
-import random
-import rule34
-import json
+import logging
+
+# Third party libraries
+import textwrap
+from traceback import format_exception
+
 import discord
+from pathlib import Path
+import motor.motor_asyncio
 from discord.ext import commands
-from discord import File
 
-rule34 = rule34.Sync()
-rule34.getImages("SearchQuery")
-intents = discord.Intents(messages=True, guilds=True, reactions=True, members=True, presences=True)
+# Local code
+import utils.json_loader
+from utils.mongo import Document
+from utils.util import clean_code, Pag
 
-client = commands.Bot(command_prefix='.', intents=intents, case_insensitive=True)
-client.remove_command('help')
+cwd = Path(__file__).parents[0]
+cwd = str(cwd)
+print(f"{cwd}\n-----")
 
 
-# Lets you know if bot is Running!
-@client.event
+async def get_prefix(bot, message):
+    # If dms
+    if not message.guild:
+        return commands.when_mentioned_or(bot.DEFAULTPREFIX)(bot, message)
+
+    # noinspection PyBroadException
+    try:
+        data = await bot.config.find(message.guild.id)
+
+        # Make sure we have a usable prefix
+        if not data or "prefix" not in data:
+            return commands.when_mentioned_or(bot.DEFAULTPREFIX)(bot, message)
+        return commands.when_mentioned_or(data["prefix"])(bot, message)
+    except:
+        return commands.when_mentioned_or(bot.DEFAULTPREFIX)(bot, message)
+
+
+intents = discord.Intents.all()  # Help command requires member intents
+DEFAULTPREFIX = "!"
+secret_file = utils.json_loader.read_json("secrets")
+bot = commands.Bot(
+    command_prefix=get_prefix,
+    case_insensitive=True,
+    owner_id=380153305394839554,
+    help_command=None,
+    intents=intents,
+)  # change command_prefix='-' to command_prefix=get_prefix for custom prefixes
+bot.config_token = secret_file["token"]
+bot.connection_url = secret_file["mongo"]
+
+bot.news_api_key = secret_file["news api"]
+bot.joke_api_key = secret_file["x-rapidapi-key"]
+
+logging.basicConfig(level=logging.INFO)
+
+bot.DEFAULTPREFIX = DEFAULTPREFIX
+bot.blacklisted_users = []
+bot.muted_users = {}
+bot.cwd = cwd
+
+bot.version = "1.0.0"
+
+bot.colors = {
+    "WHITE": 0xFFFFFF,
+    "AQUA": 0x1ABC9C,
+    "GREEN": 0x2ECC71,
+    "BLUE": 0x3498DB,
+    "PURPLE": 0x9B59B6,
+    "LUMINOUS_VIVID_PINK": 0xE91E63,
+    "GOLD": 0xF1C40F,
+    "ORANGE": 0xE67E22,
+    "RED": 0xE74C3C,
+    "NAVY": 0x34495E,
+    "DARK_AQUA": 0x11806A,
+    "DARK_GREEN": 0x1F8B4C,
+    "DARK_BLUE": 0x206694,
+    "DARK_PURPLE": 0x71368A,
+    "DARK_VIVID_PINK": 0xAD1457,
+    "DARK_GOLD": 0xC27C0E,
+    "DARK_ORANGE": 0xA84300,
+    "DARK_RED": 0x992D22,
+    "DARK_NAVY": 0x2C3E50,
+}
+bot.color_list = [c for c in bot.colors.values()]
+
+
+@bot.event
 async def on_ready():
-    await client.change_presence(status=discord.Status.do_not_disturb, activity=discord.Game('Watching Anime!'))
-    print('Logged in as {0.user}'.format(client))
-
-
-# Prints in output when someone joins a server the bot is in
-@client.event
-async def on_member_join(member):
-    print(f'{member} Has joined the Server!')
-
-
-# Prints in the output for when someone leaves or get banned/kicked form a server the bot is in
-@client.event
-async def on_member_remove(member):
-    print(f'{member} Has left the Server!')
-
-
-# simple error handler for unknown commands
-@client.event
-async def on_command_error(ctx, error):
-    if isinstance(error, commands.CommandNotFound):
-        await ctx.send('Please Type a Valid Command!', delete_after=5.0)
-
-
-@client.command()
-@commands.cooldown(1, 5, commands.BucketType.user)
-async def hello(ctx):
-    await ctx.send('Hello!')
-
-
-# Ping Command
-@client.command()
-@commands.cooldown(1, 5, commands.BucketType.user)
-async def ping(ctx):
-    await ctx.send(f'Pong! {round(client.latency * 1000)}ms')
-
-
-# 8ball Command
-@client.command(aliases=['8ball'])
-@commands.cooldown(1, 5, commands.BucketType.user)
-async def _8ball(ctx, *, question):
-    responses = [
-        "It is certain.", "It is decidedly so.", "Without a doubt.", "Yes – definitely.", "You may rely on it.",
-        "As I see it, yes.", "Most likely.", "Outlook good.", "Yes.", "Signs point to yes.", "Reply hazy, try again.",
-        "Ask again later.", "Better not tell you now.", "Cannot predict now.", "Concentrate and ask again.",
-        "Don't count on it.", "My reply is no.", "My sources say no.", "Outlook not so good.", "Very doubtful."
-    ]
-    await ctx.send(f'Question: {question}\n\nAnswer: {random.choice(responses)}')
-
-
-# Purge Command
-@client.command()
-@commands.has_permissions(manage_messages=True)
-@commands.cooldown(1, 5, commands.BucketType.user)
-async def purge(ctx, amount: int):
-    await ctx.channel.purge(limit=amount)
-
-
-@purge.error
-async def purgeError(ctx, error):
-    if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send('Please Specify an Amount!')
-    elif isinstance(error, commands.MissingPermissions):
-        await ctx.send('Missing Permissions!')
-
-
-# roll Command
-@client.command()
-@commands.cooldown(1, 5, commands.BucketType.user)
-async def roll(ctx, *, choice: int):
-    responses = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    if choice >= 11:
-        await ctx.send('Pick between 1-10')
-    else:
-        await ctx.send(f'You Choose: {choice}\nRolled: {random.choice(responses)}')
-
-
-@roll.error
-async def rollError(ctx, error):
-    if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send('Pick a number between 1-10')
-
-
-@client.command()
-@commands.guild_only()
-@commands.has_permissions(kick_members=True)
-@commands.cooldown(1, 5, commands.BucketType.user)
-async def kick(ctx, *, reason=None):
-    member = ctx.message.author
-    await member.kick(reason=reason)
-
-
-@client.command()
-@commands.guild_only()
-@commands.has_permissions(ban_members=True)
-@commands.cooldown(1, 5, commands.BucketType.user)
-async def ban(ctx, member: discord.Member, *, reason=None):
-    await member.ban(reason=reason)
-    print(f'{member} Was Banned')
-    await ctx.send(f'**{member} was Banned!**')
-
-
-@client.command()
-@commands.has_permissions(ban_members=True)
-@commands.cooldown(1, 5, commands.BucketType.user)
-async def unban(ctx, userId):
-    user = discord.Object(id=userId)
-    await ctx.guild.unban(user)
-    await ctx.send(f"Unbanned {user}")
-
-
-# Help Message
-@client.command()
-@commands.has_permissions(manage_messages=True)
-@commands.cooldown(1, 5, commands.BucketType.user)
-async def help(ctx):
-    embed = discord.Embed(title="General Commands",
-                          description="- Help >> Sends This Message!\n"
-                                      "- 8ball >> Ask it anything!\n"
-                                      "- Roll >> Choose a Number 1-10 and Roll\n"
-                                      "- Ping >> Tells you the Bots Ping\n"
-                                      "- avatar >> Steals pinged users avatar\n"
-                                      "- spank >> ping someone to spank them!\n"
-                                      "- hug >> ping someone to hug them!\n"
-                                      "- serverinfo >> gives basic server info!\n"
-                                      "- invite >> sends bots invite link\n"
-                                      "- balance >> Tells You Your Balance!",
-                          color=discord.colour.Colour.dark_blue())
-    embed.add_field(name="Admin Commands", value="- Purge \n - Kick \n - Ban", inline=False)
-    embed.add_field(name="Gambling Commands",
-                    value="- coinflip >> Flips a Coin\n - roulette >> 1/6 Chance of being shot DEAD!\n")
-    embed.set_footer(text="Bot made by: ZeroTwo#8676 ")
-    if True:
-        await ctx.send(embed=embed)
-
-
-@help.error
-async def helpError(ctx, error):
-    embed1 = discord.Embed(title="Commands",
-                           description="- Help >> Sends This Message!\n"
-                                       "- 8ball >> Ask it anything!\n"
-                                       "- Roll >> Choose a Number 1-10 and Roll\n"
-                                       "- Ping >> Tells you the Bots Ping\n"
-                                       "- avatar >> Steals pinged users avatar\n"
-                                       "- coinflip >> Flips a Coin\n"
-                                       "- roulette >> 1/6 Chance of being shot DEAD!\n"
-                                       "- spank >> ping someone to spank them!\n"
-                                       "- hug >> ping someone to give them a hug1\n"
-                                       "- serverinfo >> gives basic server info!\n"
-                                       "- invite >> sends bots invite link!\n"
-                                       "- balance >> Tells You Your Balance!",
-                           color=discord.colour.Colour.dark_blue())
-    embed1.set_footer(text="Bot made by: ZeroTwo#8676 ")
-
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send(embed=embed1)
-
-
-@client.command(aliases=['av'])
-@commands.cooldown(1, 5, commands.BucketType.user)
-async def avatar(ctx, *, member: discord.Member = None):
-    if not member:
-        member = ctx.message.author
-    userAvatar = member.avatar_url
-    await ctx.send(userAvatar)
-
-
-@avatar.error
-async def avatarError(ctx, error):
-    if isinstance(error, commands.MemberNotFound):
-        await ctx.send('Please Ping Someone!')
-
-
-@client.command(aliases=['cf'])
-@commands.cooldown(1, 5, commands.BucketType.user)
-async def coinflip(ctx, *, choice):
-    HorT = ['Heads', 'Tails']
-    random_response = random.choice(HorT)
-    if random_response == choice:
-        await ctx.send(f'You Won! it was {random_response}')
-    else:
-        await ctx.send(f'You Lost! it was {random_response}')
-
-
-@coinflip.error
-async def coinflipError(ctx, error):
-    if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send('Please Choose Heads or Tails')
-
-
-@client.command()
-@commands.has_permissions(manage_roles=True)
-@commands.cooldown(1, 5, commands.BucketType.user)
-async def addrole(ctx, role: discord.Role, user: discord.Member):
-    await user.add_roles(role)
-    await ctx.send(f'**{user} was given the {role} role!**', delete_after=5.0)
-
-
-@addrole.error
-async def addroleError(ctx, error):
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send('You do Not have Permission to use this Command!', delete_after=5.0)
-
-
-@client.command()
-@commands.has_permissions(manage_roles=True)
-@commands.cooldown(1, 5, commands.BucketType.user)
-async def delrole(ctx, role: discord.Role, user: discord.Member):
-    await user.remove_roles(role)
-    await ctx.send(f"**{user}'s {role} was Revoked!**", delete_after=5.0)
-
-
-@delrole.error
-async def avatarError(ctx, error):
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send('You do Not have Permission to use this Command!')
-
-
-@client.command()
-@commands.cooldown(1, 5, commands.BucketType.user)
-async def aeveryone(ctx):
-    member = ctx.message.author
-    if ctx.author.id == 380153305394839554:
-        await ctx.send(f'{member} said @everyone')
-
-
-@kick.error
-async def kickError(ctx, error):
-    member = ctx.message.author
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send(f'{member} is Missing Perms!')
-    elif isinstance(error, commands.BotMissingPermissions):
-        await ctx.send('Bot is missing Perms!')
-    elif isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send('Missing Arguments!')
-
-
-@client.command(aliases=['rr'])
-@commands.cooldown(1, 5, commands.BucketType.user)
-async def roulette(ctx):
-    member = ctx.message.author
-    responses = "click", "click", "click", "click", "click", "BANG"
-    responses1 = "Ooooh so lucky!", "has survived for today!", "you got lucky!"
-    responses2 = "Better luck next time", "dang that must suck...", "RIP", "..wont be at your funeral."
-    random_response = random.choice(responses)
-    embed1 = discord.Embed(title="Roulette",
-                           description=f"{member} {random_response} {random.choice(responses2)}",
-                           color=discord.colour.Colour.dark_red())
-    embed1.set_footer(text="Bot made by: ZeroTwo#8676 ")
-    embed2 = discord.Embed(title="Roulette",
-                           description=f"{member} {random.choice(responses1)}",
-                           color=discord.colour.Colour.dark_blue())
-    embed2.set_footer(text="Bot made by: ZeroTwo#8676 ")
-    if random_response == "BANG":
-        await ctx.send(embed=embed1)
-    else:
-        await ctx.send(embed=embed2)
-
-
-@client.command()
-@commands.cooldown(1, 5, commands.BucketType.user)
-async def spank(ctx, *, member: discord.Member):
-    member1 = ctx.message.author
-    diR = "gif/spank"
-    gif = random.choice(os.listdir(diR))
-    with open(f'{diR}\\{gif}', 'rb') as f:
-        await ctx.send(f'{member1} has Spanked {member}')
-        await ctx.send(file=File(f))
-
-
-@client.command()
-@commands.cooldown(1, 5, commands.BucketType.user)
-async def hug(ctx, *, member: discord.Member):
-    member1 = ctx.message.author
-    await ctx.send(f'{member1} has hugged {member}!')
-
-
-@client.command()
-@commands.cooldown(1, 5, commands.BucketType.user)
-async def invite(ctx):
-    embed = discord.Embed(title="Click to invite!",
-                          url="https://discord.com/api/oauth2/authorize?client_id=664037461218820106&permissions=8&scope=bot",
-                          color=discord.colour.Colour.dark_red())
-    embed.set_footer(text="Bot made by: ZeroTwo#8676")
-    await ctx.send(embed=embed)
-
-
-@client.command()
-@commands.cooldown(1, 5, commands.BucketType.user)
-async def serverinfo(ctx):
-    name = str(ctx.guild.name)
-    description = str(ctx.guild.description)
-
-    owner = str(ctx.guild.owner)
-    iD = str(ctx.guild.id)
-    region = str(ctx.guild.region)
-    memberCount = str(ctx.guild.member_count)
-    icon = str(ctx.guild.icon_url)
-    embed = discord.Embed(
-        title=name + " Server Information",
-        description=description,
-        color=discord.Color.blue()
+    # On ready, print some details to standard out
+    print(
+        f"-----\nLogged in as: {bot.user.name} : {bot.user.id}\n-----\nMy current prefix is: {bot.DEFAULTPREFIX}\n-----"
     )
-    embed.set_thumbnail(url=icon)
-    embed.add_field(name="Owner", value=owner, inline=True)
-    embed.add_field(name="Server ID", value=iD, inline=True)
-    embed.add_field(name="Region", value=region, inline=True)
-    embed.add_field(name="Member Count", value=memberCount, inline=True)
-    await ctx.send(embed=embed)
+    await bot.change_presence(
+        activity=discord.Game(name="Playing DITF")
+    )  # This changes the bots 'activity'
+
+    for document in await bot.config.get_all():
+        print(document)
+
+    currentMutes = await bot.mutes.get_all()
+    for mute in currentMutes:
+        bot.muted_users[mute["_id"]] = mute
+
+    print(bot.muted_users)
+
+    print("Initialized Database\n-----")
 
 
-# TODO Balance Command
-
-
-@client.command()
-@commands.cooldown(1, 120, commands.BucketType.user)
-async def work(ctx):
-    await open_account(ctx.author)
-    users = await get_bank_data()
-    user = ctx.author
-    wallet_amt = users[str(user.id)]['wallet']
-    new_wall_amt = wallet_amt + random.randint(250, 3000)
-    if str(user.id) in users:
-        users[str(user.id)]['wallet'] = new_wall_amt
-        await ctx.send(f'**You Worked a Successful Shift! Your new Balance is {new_wall_amt}!**')
-    else:
-        return False
-    with open('mainBank.json', 'w') as f:
-        json.dump(users, f)
-    return True
-
-
-@work.error
-async def workError(ctx, error):
-    if isinstance(error, commands.CommandOnCooldown):
-        await ctx.send(f'This command is not ready to use, try again in  %.2f seconds' % error.retry_after)
+@bot.event
+async def on_message(message):
+    # Ignore messages sent by yourself
+    if message.author.bot:
         return
 
+    # A way to blacklist users from the bot by not processing commands
+    # if the author is in the blacklisted_users list
+    if message.author.id in bot.blacklisted_users:
+        return
 
-@client.command(aliases=['bal'])
-async def balance(ctx):
-    await open_account(ctx.author)
-
-    users = await get_bank_data()
-    user = ctx.author
-    wallet_amt = users[str(user.id)]['wallet']
-    bank_amt = users[str(user.id)]['bank']
-
-    em = discord.Embed(title=f"{ctx.author.name}'s balance!", color=discord.Color.blue())
-    em.add_field(name="Wallet", value=wallet_amt)
-    em.add_field(name="Bank", value=bank_amt)
-    em.set_footer(text="Bot made by: ZeroTwo#8676")
-    await ctx.send(embed=em)
-
-
-async def open_account(user):
-    users = await get_bank_data()
-    if str(user.id) in users:
-        return False
-    else:
-        print(f'{user.id} Has been added to the Bank!')
-        users[str(user.id)] = {}
-        users[str(user.id)]['wallet'] = 0
-        users[str(user.id)]['bank'] = 0
-    with open('mainBank.json', 'w') as f:
-        json.dump(users, f)
-    return True
-
-
-async def get_bank_data():
-    with open("mainBank.json", "r") as f:
-        users = json.load(f)
-    return users
-
-
-@client.command(aliases=["lb"])
-async def leaderboard(ctx, x=1):
-    users = await get_bank_data()
-    leader_board = {}
-    total = []
-    for user in users:
-        name = int(user)
-        total_amount = users[user]["wallet"] + users[user]["bank"]
-        leader_board[total_amount] = name
-        total.append(total_amount)
-
-    total = sorted(total, reverse=True)
-
-    em = discord.Embed(title=f"Top 5 Richest People",
-                       description="Top Richest Players in de Bot!",
-                       color=discord.Color(0xfa43ee))
-    index = 1
-    for amt in total:
-        id_ = leader_board[amt]
-        member = client.get_user(id_)
-        name = member.name
-        em.add_field(name=f"{index}. {name}", value=f"{amt}", inline=False)
-        em.set_footer(text="Bot made by: ZeroTwo#8676")
-        if index == x:
-            index += 5
+    # Whenever the bot is tagged, respond with its prefix
+    if message.content.startswith(f"<@!{bot.user.id}>") and len(message.content) == len(
+            f"<@!{bot.user.id}>"
+    ):
+        data = await bot.config.get_by_id(message.guild.id)
+        if not data or "prefix" not in data:
+            prefix = bot.DEFAULTPREFIX
         else:
-            index += 5
+            prefix = data["prefix"]
+        await message.channel.send(f"My prefix here is `{prefix}`", delete_after=15)
 
-    await ctx.send(embed=em)
+    await bot.process_commands(message)
 
 
-client.run('NjY0MDM3NDYxMjE4ODIwMTA2.XhRPEw.LOwGMDOlV4ugDqRpoV75I6wpDcA')
-# NjY0MDM3NDYxMjE4ODIwMTA2.XhRPEw.MQ_fgVbcKW_-Tl0Td0rf9Gz5V_Q
+@bot.command(name="eval", aliases=["exec"])
+@commands.is_owner()
+async def _eval(ctx, *, code):
+    code = clean_code(code)
+
+    local_variables = {
+        "discord": discord,
+        "commands": commands,
+        "bot": bot,
+        "ctx": ctx,
+        "channel": ctx.channel,
+        "author": ctx.author,
+        "guild": ctx.guild,
+        "message": ctx.message
+    }
+
+    stdout = io.StringIO()
+
+    try:
+        with contextlib.redirect_stdout(stdout):
+            exec(
+                f"async def func():\n{textwrap.indent(code, '    ')}", local_variables,
+            )
+
+            obj = await local_variables["func"]()
+            result = f"{stdout.getvalue()}\n-- {obj}\n"
+    except Exception as e:
+        result = "".join(format_exception(e, e, e.__traceback__))
+
+    pager = Pag(
+        timeout=100,
+        entries=[result[i: i + 2000] for i in range(0, len(result), 2000)],
+        length=1,
+        prefix="```py\n",
+        suffix="```"
+    )
+
+    await pager.start(ctx)
+
+
+if __name__ == "__main__":
+    # When running this file, if it is the 'main' file
+    # I.E its not being imported from another python file run this
+    bot.mongo = motor.motor_asyncio.AsyncIOMotorClient(str(bot.connection_url))
+    bot.db = bot.mongo["menudocs"]
+    bot.config = Document(bot.db, "config")
+    bot.mutes = Document(bot.db, "mutes")
+    bot.invites = Document(bot.db, "invites")
+    bot.command_usage = Document(bot.db, "command_usage")
+    bot.reaction_roles = Document(bot.db, "reaction_roles")
+
+    for file in os.listdir(cwd + "/cogs"):
+        if file.endswith(".py") and not file.startswith("_"):
+            bot.load_extension(f"cogs.{file[:-3]}")
+
+    bot.run(bot.config_token)
