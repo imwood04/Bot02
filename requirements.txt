@@ -8,6 +8,5 @@ python-dateutil
 DiscordUtils
 aiohttp
 emojis
-discord
 buttons==0.1.9
 pymongo==3.11.3
