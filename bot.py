@@ -179,13 +179,7 @@ async def _eval(ctx, *, code):
 if __name__ == "__main__":
     # When running this file, if it is the 'main' file
     # I.E its not being imported from another python file run this
-    bot.mongo = motor.motor_asyncio.AsyncIOMotorClient(str(bot.connection_url))
-    bot.db = bot.mongo["menudocs"]
-    bot.config = Document(bot.db, "config")
-    bot.mutes = Document(bot.db, "mutes")
-    bot.invites = Document(bot.db, "invites")
-    bot.command_usage = Document(bot.db, "command_usage")
-    bot.reaction_roles = Document(bot.db, "reaction_roles")
+
 
     for file in os.listdir(cwd + "/cogs"):
         if file.endswith(".py") and not file.startswith("_"):
