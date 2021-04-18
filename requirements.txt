@@ -9,3 +9,4 @@ DiscordUtils
 aiohttp
 emojis
 discord
+buttons==0.1.9
