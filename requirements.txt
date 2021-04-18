@@ -8,3 +8,4 @@ python-dateutil
 DiscordUtils
 aiohttp
 emojis
+discord
