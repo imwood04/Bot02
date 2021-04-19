@@ -35,6 +35,7 @@ class Giveaway(commands.Cog):
         name="giveaway",
         description="Create a full giveaway!"
     )
+    @commands.has_permissions(manage_roles=True)
     @commands.guild_only()
     async def giveaway(self, ctx):
         await ctx.send("Lets start this giveaway, answer the questions I ask and we shall proceed.")
