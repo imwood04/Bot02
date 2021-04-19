@@ -1,7 +1,7 @@
 import json
+import random
 
 import discord
-import random
 from discord.ext import commands
 
 
@@ -25,6 +25,17 @@ async def open_account(user):
     return True
 
 
+async def update_bank(user, change=0, mode='wallet'):
+    users = await get_bank_data()
+
+    users[str(user.id)][mode] += change
+
+    with open('mainBank.json', 'w') as f:
+        json.dump(users, f)
+    bal = [users[str(user.id)]['wallet'], users[str(user.id)]['bank']]
+    return bal
+
+
 class Economy(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -33,7 +44,7 @@ class Economy(commands.Cog):
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
-    @commands.command()
+    @commands.command(name='work', description='Work to Get some Money')
     @commands.cooldown(1, 120, commands.BucketType.user)
     async def work(self, ctx):
         await open_account(ctx.author)
@@ -50,8 +61,8 @@ class Economy(commands.Cog):
             json.dump(users, f)
         return True
 
-    @commands.command(aliases=['bal'])
-    async def balance(self, ctx):
+    @commands.command(name='balance', description='Gets your Balance', aliases=['bal'])
+    async def balance(self, ctx, member: discord.Member):
         await open_account(ctx.author)
         users = await get_bank_data()
         user = ctx.author
@@ -63,6 +74,73 @@ class Economy(commands.Cog):
         em.add_field(name="Bank", value=bank_amt)
         em.set_footer(text="Bot made by: ZeroTwo#8676")
         await ctx.send(embed=em)
+
+    @commands.command(name='withdraw', description='Withdraw Some Money', aliases=['with'])
+    async def withdraw(self, ctx, amount=None):
+        await open_account(ctx.author)
+
+        if amount is None:
+            await ctx.send("Please enter the amount!")
+            return
+
+        bal = await update_bank(ctx.author)
+        amount = int(amount)
+
+        if amount > bal[1]:
+            await ctx.send('You Dont have enough money!')
+            return
+        if amount < 0:
+            await ctx.send('Amount must be Positive')
+            return
+        await update_bank(ctx.author, amount)
+        await update_bank(ctx.author, -1 * amount, 'bank')
+
+        await ctx.send(f'You Withdrew {amount}')
+
+    @commands.command(name='deposit', description='Deposit Some Money', aliases=['dep'])
+    async def deposit(self, ctx, amount=None):
+        await open_account(ctx.author)
+
+        if amount is None:
+            await ctx.send("Please enter the amount!")
+            return
+
+        bal = await update_bank(ctx.author)
+        amount = int(amount)
+
+        if amount > bal[0]:
+            await ctx.send('You Dont have enough money!')
+            return
+        if amount < 0:
+            await ctx.send('Amount must be Positive')
+            return
+        await update_bank(ctx.author, -1 * amount)
+        await update_bank(ctx.author, amount, 'bank')
+
+        await ctx.send(f'You Deposited {amount}')
+
+    @commands.command(name='pay', description='Pay Someone Money')
+    async def pay(self, ctx, member: discord.Member, amount=None):
+        await open_account(ctx.author)
+        await open_account(member)
+
+        if amount is None:
+            await ctx.send("Please enter the amount!")
+            return
+
+        bal = await update_bank(ctx.author)
+        amount = int(amount)
+
+        if amount > bal[1]:
+            await ctx.send('You Dont have enough money!')
+            return
+        if amount < 0:
+            await ctx.send('Amount must be Positive')
+            return
+        await update_bank(ctx.author, -1 * amount, 'bank')
+        await update_bank(member, amount, 'bank')
+
+        await ctx.send(f'You Paid {member} {amount}')
 
 
 def setup(bot):

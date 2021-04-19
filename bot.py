@@ -63,7 +63,7 @@ bot.blacklisted_users = []
 bot.muted_users = {}
 bot.cwd = cwd
 
-bot.version = "1.0.0"
+bot.version = "1.0.7"
 
 bot.colors = {
     "WHITE": 0xFFFFFF,

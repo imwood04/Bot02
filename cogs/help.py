@@ -8,7 +8,7 @@ from utils.util import Pag
 class Help(commands.Cog, name="Help command"):
     def __init__(self, bot):
         self.bot = bot
-        self.cmds_per_page = 6
+        self.cmds_per_page = 8
 
     @staticmethod
     def get_command_signature(command: commands.Command, ctx: commands.Context):
