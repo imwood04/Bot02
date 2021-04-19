@@ -62,7 +62,7 @@ class Economy(commands.Cog):
         return True
 
     @commands.command(name='balance', description='Gets your Balance', aliases=['bal'])
-    async def balance(self, ctx, member: discord.Member):
+    async def balance(self, ctx):
         await open_account(ctx.author)
         users = await get_bank_data()
         user = ctx.author
