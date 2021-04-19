@@ -1,1 +1,1 @@
-# Zero Two Discord Bot
+# NaGames Discord Bot
