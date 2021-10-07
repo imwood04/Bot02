@@ -23,21 +23,21 @@ cwd = str(cwd)
 print(f"{cwd}\n-----")
 
 
-async def get_prefix(bot, message):
+async def get_prefix(botpr, message):
     # If dms
     if not message.guild:
-        return commands.when_mentioned_or(bot.DEFAULTPREFIX)(bot, message)
+        return commands.when_mentioned_or(botpr.DEFAULTPREFIX)(botpr, message)
 
     # noinspection PyBroadException
     try:
-        data = await bot.config.find(message.guild.id)
+        data = await botpr.config.find(message.guild.id)
 
         # Make sure we have a usable prefix
         if not data or "prefix" not in data:
-            return commands.when_mentioned_or(bot.DEFAULTPREFIX)(bot, message)
-        return commands.when_mentioned_or(data["prefix"])(bot, message)
+            return commands.when_mentioned_or(botpr.DEFAULTPREFIX)(botpr, message)
+        return commands.when_mentioned_or(data["prefix"])(botpr, message)
     except:
-        return commands.when_mentioned_or(bot.DEFAULTPREFIX)(bot, message)
+        return commands.when_mentioned_or(botpr.DEFAULTPREFIX)(botpr, message)
 
 
 intents = discord.Intents.all()  # Help command requires member intents
@@ -102,8 +102,8 @@ async def on_ready():
     for document in await bot.config.get_all():
         print(document)
 
-    currentMutes = await bot.mutes.get_all()
-    for mute in currentMutes:
+    currentmutes = await bot.mutes.get_all()
+    for mute in currentmutes:
         bot.muted_users[mute["_id"]] = mute
 
     print(bot.muted_users)
