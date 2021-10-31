@@ -3,7 +3,7 @@ from discord.ext import commands
 from pymongo import MongoClient
 
 bot_channel = 882420889675771914
-talk_channel = [882407949669122110]
+talk_channel = [882407949669122110, 882408002118885437, 889264568415703050, 883923791720349717, 884963283407355985, 882408243236839485, 882421939250032723, 890028918747328532, 902785816839983187, 882408025485365248]
 
 level_roles = ['Member Lvl 5']
 level_num = [5]
@@ -64,7 +64,7 @@ class LevelSystem(commands.Cog):
                 lvl = 0
                 rank = 0
                 while True:
-                    if xp < ((50 * (lvl ** 2)) + (50 * (lvl))):
+                    if xp < ((50 * (lvl ** 2)) + (50 * lvl)):
                         break
                     lvl += 1
                 xp -= ((50 * (lvl - 1)) + (50 * (lvl - 1)))
@@ -77,9 +77,9 @@ class LevelSystem(commands.Cog):
                 embed = discord.Embed(title="{}'s level stats".format(ctx.author.name))
                 embed.add_field(name='Name', value=ctx.author.mention, inline=True)
                 embed.add_field(name='XP', value=f'{xp}/{int(200 * ((1 / 2) * lvl))}', inline=True)
+                embed.add_field(name='Level', value=f'{lvl}', inline=True)
                 embed.add_field(name='Rank', value=f'{rank}/{ctx.guild.member_count}', inline=True)
-                embed.add_field(name='Progress Bar [lvl]',
-                                value=boxes * ":blue_square:" + (20 - boxes) * ":white_large_square:", inline=False)
+                embed.add_field(name='Progress Bar [lvl]', value=boxes * ":blue_square:" + (20 - boxes) * ":white_large_square:", inline=False)
                 embed.set_thumbnail(url=ctx.author.avatar_url)
                 await ctx.channel.send(embed=embed)
 
