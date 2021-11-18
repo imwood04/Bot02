@@ -35,14 +35,14 @@ class LevelSystem(commands.Cog):
                     leveling.update_one({"id": message.author.id}, {"$set": {"xp": xp}})
                     lvl = 0
                     while True:
-                        if xp < ((50 * (lvl ** 2)) + (50 * (lvl))):
+                        if xp < ((50 * (lvl ** 2)) + (50 * lvl)):
                             break
                         lvl += 1
                     xp -= ((50 * (lvl - 1)) + (50 * (lvl - 1)))
 
                     if xp == 0:
                         await message.channel.send(
-                            f'Congrats {message.author.mention}! YOu Leveled up to **level {lvl}**')
+                            f'Congrats {message.author.mention}! You Leveled up to **level {lvl}**')
                         for i in range(len(level_roles)):
                             if lvl == level_num[i]:
                                 await message.author.add_roles(
@@ -76,16 +76,17 @@ class LevelSystem(commands.Cog):
                         break
                 embed = discord.Embed(title="{}'s level stats".format(ctx.author.name))
                 embed.add_field(name='Name', value=ctx.author.mention, inline=True)
-                embed.add_field(name='XP', value=f'{xp}/{int(200 * ((1 / 2) * lvl))}', inline=True)
+                embed.add_field(name='XP', value=f'{xp}/{int(50 * (lvl ** 2)) + (50 * lvl)}', inline=True)
                 embed.add_field(name='Level', value=f'{lvl}', inline=True)
                 embed.add_field(name='Rank', value=f'{rank}/{ctx.guild.member_count}', inline=True)
                 embed.add_field(name='Progress Bar [lvl]', value=boxes * ":blue_square:" + (20 - boxes) * ":white_large_square:", inline=False)
                 embed.set_thumbnail(url=ctx.author.avatar_url)
                 await ctx.channel.send(embed=embed)
 
+    # noinspection PyBroadException
     @commands.command(description="Only works in my discord Rn!")
     async def leaderboard(self, ctx):
-        if (ctx.channel.id == bot_channel):
+        if ctx.channel.id == bot_channel:
             rankings = leveling.find().sort("xp", -1)
             i = 1
             embed = discord.Embed(title="Rankings!")
