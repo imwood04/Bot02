@@ -23,7 +23,6 @@ class Fun(commands.Cog):
         ]
         await ctx.send(f'Question: {question}\n\nAnswer: ||{random.choice(responses)}||')
 
-
     @commands.command(name='coinflip', description='', aliases=['cf'])
     async def coinflip(self, ctx, *, choice):
         HorT = ['Heads', 'Tails']
@@ -32,7 +31,6 @@ class Fun(commands.Cog):
             await ctx.send(f'You Won! it was {random_response}')
         else:
             await ctx.send(f'You Lost! it was {random_response}')
-
 
     @commands.command(name='roulette', description='Test Your Luck', aliases=['rr'])
     async def roulette(self, ctx):
@@ -53,7 +51,6 @@ class Fun(commands.Cog):
             await ctx.send(embed=embed1)
         else:
             await ctx.send(embed=embed2)
-
 
     @commands.command(name='roll', description='Pick a Number 1-10 and Roll')
     async def roll(self, ctx, *, choice: int):

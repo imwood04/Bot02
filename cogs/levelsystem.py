@@ -84,7 +84,7 @@ class LevelSystem(commands.Cog):
                 await ctx.channel.send(embed=embed)
 
     # noinspection PyBroadException
-    @commands.command(description="Only works in my discord Rn!")
+    @commands.command(description="Only works in my discord Rn!", aliases=['lb'])
     async def leaderboard(self, ctx):
         if ctx.channel.id == bot_channel:
             rankings = leveling.find().sort("xp", -1)
