@@ -182,6 +182,7 @@ if __name__ == "__main__":
     # I.E it's not being imported from another python file run this
     bot.mongo = motor.motor_asyncio.AsyncIOMotorClient(str(bot.connection_url))
     bot.db = bot.mongo["menudocs"]
+    bot.eco = Document(bot.db, "eco")
     bot.config = Document(bot.db, "config")
     bot.mutes = Document(bot.db, "mutes")
     bot.invites = Document(bot.db, "invites")
