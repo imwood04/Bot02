@@ -50,7 +50,8 @@ bot = commands.Bot(
     help_command=None,
     intents=intents,
 )  # change command_prefix='-' to command_prefix=get_prefix for custom prefixes
-bot.config_token = secret_file["token"]
+#bot.config_token = secret_file["token"]
+bot.config_token = secret_file["test token"]
 bot.connection_url = secret_file["mongo"]
 
 bot.news_api_key = secret_file["news api"]
@@ -63,7 +64,7 @@ bot.blacklisted_users = []
 bot.muted_users = {}
 bot.cwd = cwd
 
-bot.version = "1.0.7"
+bot.version = "1.0.8"
 
 bot.colors = {
     "WHITE": 0xFFFFFF,
@@ -178,7 +179,7 @@ async def _eval(ctx, *, code):
 
 if __name__ == "__main__":
     # When running this file, if it is the 'main' file
-    # I.E its not being imported from another python file run this
+    # I.E it's not being imported from another python file run this
     bot.mongo = motor.motor_asyncio.AsyncIOMotorClient(str(bot.connection_url))
     bot.db = bot.mongo["menudocs"]
     bot.config = Document(bot.db, "config")
