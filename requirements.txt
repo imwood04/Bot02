@@ -1,6 +1,6 @@
 discord.py
 PyNaCl
-async-timeout==4.0.2
+async-timeout
 dnspython
 motor==3.0.0
 asyncio~=3.4.3
