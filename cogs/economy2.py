@@ -82,6 +82,36 @@ class Economy2(commands.Cog):
                 await ctx.message.reply(embed=em)
                 return
 
+    @commands.command()
+    @commands.cooldown(1, 120, commands.BucketType.user)
+    async def work(self, ctx):
+        user = ctx.author
+
+        check = leveling.find_one({"id": user.id})
+
+        if check is None:
+            await ctx.message.reply(
+                "You don't have a profile!\nPlease execute the `?create` command to create a profile!")
+            return
+
+        else:
+            job_names = ["Cashier", "McDonald's Worker", "Criminal", "Retail Worker", "Mechanic"]
+            job = random.choice(job_names)
+
+            amount = random.randint(100, 1000)
+            newBal = check['money'] + amount
+
+            leveling.update_one({"id": user.id}, {"$set": {"money": newBal}})
+
+            em = discord.Embed(
+                title="You have finished working!",
+                description=f"You have worked as a **{job}** and earned **${amount}**!",
+                color=discord.Colour.random()
+            )
+
+            await ctx.message.reply(embed=em)
+            return
+
 
 def setup(bot):
     bot.add_cog(Economy2(bot))
