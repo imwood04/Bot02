@@ -50,8 +50,8 @@ bot = commands.Bot(
     help_command=None,
     intents=intents,
 )  # change command_prefix='-' to command_prefix=get_prefix for custom prefixes
-bot.config_token = secret_file["token"]
-#bot.config_token = secret_file["test token"]
+#bot.config_token = secret_file["token"]
+bot.config_token = secret_file["test token"]
 bot.connection_url = secret_file["mongo"]
 
 bot.news_api_key = secret_file["news api"]

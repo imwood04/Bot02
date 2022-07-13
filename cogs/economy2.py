@@ -9,6 +9,7 @@ cluster = MongoClient(
     "mongodb+srv://imwood04:CmjnxSxGO6nsl0JW@02.kbi7i.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
 
 leveling = cluster["menudocs"]["eco"]
+prefix = cluster["menudocs"]["config"]
 
 
 class Economy2(commands.Cog):
@@ -88,13 +89,16 @@ class Economy2(commands.Cog):
         user = ctx.author
 
         check = leveling.find_one({"id": user.id})
-
+        data = ctx.guild.id
         if check is None:
+
             await ctx.message.reply(
-                "You don't have a profile!\nPlease execute the `?create` command to create a profile!")
+                "You don't have a profile!\nPlease execute the `!create` command to create a profile!")
             return
 
         else:
+            data = await ctx.config.get_by_id(ctx.guild.id)
+
             job_names = ["Cashier", "McDonald's Worker", "Criminal", "Retail Worker", "Mechanic"]
             job = random.choice(job_names)
 
