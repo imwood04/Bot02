@@ -1,9 +1,8 @@
-import json
 import random
 
-from pymongo import MongoClient
 import discord
 from discord.ext import commands
+from pymongo import MongoClient
 
 cluster = MongoClient(
     "mongodb+srv://imwood04:CmjnxSxGO6nsl0JW@02.kbi7i.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
@@ -89,7 +88,6 @@ class Economy2(commands.Cog):
         user = ctx.author
 
         check = leveling.find_one({"id": user.id})
-        data = ctx.guild.id
         if check is None:
 
             await ctx.message.reply(
@@ -97,15 +95,14 @@ class Economy2(commands.Cog):
             return
 
         else:
-            data = await ctx.config.get_by_id(ctx.guild.id)
 
             job_names = ["Cashier", "McDonald's Worker", "Criminal", "Retail Worker", "Mechanic"]
             job = random.choice(job_names)
 
             amount = random.randint(100, 1000)
-            newBal = check['money'] + amount
+            new_bal = check['money'] + amount
 
-            leveling.update_one({"id": user.id}, {"$set": {"money": newBal}})
+            leveling.update_one({"id": user.id}, {"$set": {"money": new_bal}})
 
             em = discord.Embed(
                 title="You have finished working!",
