@@ -117,7 +117,7 @@ class Economy2(commands.Cog):
 
     # noinspection PyBroadException
     @commands.command(name='Baltop', description='Shows the Balance Leaderboard!', aliases=["bt"])
-    @commands.cooldown(1, 120, commands.BucketType.user)
+    #@commands.cooldown(1, 120, commands.BucketType.user)
     async def baltop(self, ctx):
         user = ctx.author
         channel = ctx.channel.id
@@ -126,7 +126,7 @@ class Economy2(commands.Cog):
             create = ''
             if check is None:
                 await ctx.message.reply(
-                    "You don't have a profile!\nPlease execute the `!create` command to create a profile!")
+                    "You dont have a profile!\nPlease execute the `create` command to create a profile!")
                 return
             rankings = leveling.find().sort("money", -1)
             i = 1
