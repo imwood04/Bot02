@@ -63,7 +63,10 @@ class Misc(commands.Cog):
                 check=lambda message: message.author == ctx.author
                                       and message.channel == ctx.channel,
             )
-            if msg:
+            if "@everyone" in msg.content:
+                await ctx.send("Nice Try!")
+                return
+            elif msg:
                 await sent.delete()
                 await msg.delete()
                 await ctx.send(msg.content)
