@@ -4,6 +4,8 @@ import discord
 from discord.ext import commands
 from pymongo import MongoClient
 
+import bot
+
 cluster = MongoClient(
     "mongodb+srv://imwood04:CmjnxSxGO6nsl0JW@02.kbi7i.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
 
@@ -113,6 +115,7 @@ class Economy2(commands.Cog):
             await ctx.message.reply(embed=em)
             return
 
+    # noinspection PyBroadException
     @commands.command(name='Baltop', description='Shows the Balance Leaderboard!', aliases=["bt"])
     @commands.cooldown(1, 120, commands.BucketType.user)
     async def baltop(self, ctx):
@@ -120,6 +123,7 @@ class Economy2(commands.Cog):
         channel = ctx.channel.id
         if ctx.channel.id == channel:
             check = leveling.find_one({"id": user.id})
+            create = ''
             if check is None:
                 await ctx.message.reply(
                     "You don't have a profile!\nPlease execute the `!create` command to create a profile!")
@@ -138,7 +142,6 @@ class Economy2(commands.Cog):
                 if i == 11:
                     break
             await ctx.channel.send(embed=embed)
-
 
 
 def setup(bot):

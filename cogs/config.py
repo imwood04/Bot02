@@ -4,8 +4,14 @@ import traceback
 
 import discord
 from discord.ext import commands
+from pymongo import MongoClient
 
 import utils.json_loader
+
+cluster = MongoClient(
+    "mongodb+srv://imwood04:CmjnxSxGO6nsl0JW@02.kbi7i.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+
+prefix = cluster["menudocs"]["config"]
 
 
 class Config(commands.Cog):
@@ -17,17 +23,30 @@ class Config(commands.Cog):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
     @commands.command(
-        name="prefix",
-        aliases=["changeprefix", "setprefix"],
+        name="Set Prefix",
+        aliases=["changeprefix"],
         description="Change your guilds prefix!",
-        usage="[prefix]",
+        usage="[setprefix]",
     )
     @commands.has_guild_permissions(manage_guild=True)
-    async def prefix(self, ctx, *, prefix="py."):
+    async def setprefix(self, ctx, *, prefix="py."):
         await self.bot.config.upsert({"_id": ctx.guild.id, "prefix": prefix})
         await ctx.send(
             f"The guild prefix has been set to `{prefix}`. Use `{prefix}prefix [prefix]` to change it again!"
         )
+
+    @commands.command(
+        name='Prefix',
+        description='Gets the bots Prefix!'
+    )
+    async def prefix(self, ctx):
+        check = prefix.find_one({"_id": ctx.guild.id})
+        prefixx = check['prefix']
+        if check is None:
+            await ctx.send('How?????')
+            return
+        else:
+            await ctx.send(f'The Prefix for this Guild is **"  {prefixx}  "**')
 
     @commands.command(
         name="deleteprefix", aliases=["dp"], description="Delete your guilds prefix!"
