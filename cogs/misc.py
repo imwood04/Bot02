@@ -65,6 +65,8 @@ class Misc(commands.Cog):
             )
             if "@everyone" in msg.content:
                 await ctx.send("Nice Try!")
+                await sent.delete()
+                await msg.delete()
                 return
             elif msg:
                 await sent.delete()
