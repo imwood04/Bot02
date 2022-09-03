@@ -117,7 +117,7 @@ class Economy2(commands.Cog):
 
     # noinspection PyBroadException
     @commands.command(name='Baltop', description='Shows the Balance Leaderboard!', aliases=["bt"])
-    #@commands.cooldown(1, 120, commands.BucketType.user)
+    @commands.cooldown(1, 120, commands.BucketType.user)
     async def baltop(self, ctx):
         user = ctx.author
         channel = ctx.channel.id

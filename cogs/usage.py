@@ -1,6 +1,12 @@
 from discord.ext import commands
+from pymongo import MongoClient
 
 from utils.util import Pag
+
+cluster = MongoClient(
+    "mongodb+srv://imwood04:CmjnxSxGO6nsl0JW@02.kbi7i.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+
+usage = cluster["menudocs"]["command_usage"]
 
 
 class Usage(commands.Cog):
