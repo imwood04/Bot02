@@ -52,7 +52,7 @@ class LevelSystem(commands.Cog):
                                 embed.set_thumbnail(url=message.author.avatar.url)
                                 await message.channel.send(embed=embed)
 
-    @commands.command(description="Only works in my discord Rn!")
+    @commands.command(description="Not Working ATM")
     async def rank(self, ctx):
         if ctx.channel.id == bot_channel:
             stats = leveling.find_one({"id": ctx.author.id})
@@ -84,9 +84,10 @@ class LevelSystem(commands.Cog):
                 await ctx.channel.send(embed=embed)
 
     # noinspection PyBroadException
-    @commands.command(description="Only works in my discord Rn!", aliases=['lb'])
+    @commands.command(description="Shows This Guilds level ranking!", aliases=['lb'])
     async def leaderboard(self, ctx):
-        if ctx.channel.id == bot_channel:
+        channel = ctx.channel.id
+        if ctx.channel.id == channel:
             rankings = leveling.find().sort("xp", -1)
             i = 1
             embed = discord.Embed(title="Rankings!")
