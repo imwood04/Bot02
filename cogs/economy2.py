@@ -82,7 +82,7 @@ class Economy2(commands.Cog):
                 await ctx.message.reply(embed=em)
                 return
 
-    @commands.command()
+    @commands.command(name='Work', description='Make your Earnings')
     @commands.cooldown(1, 120, commands.BucketType.user)
     async def work(self, ctx):
         user = ctx.author
@@ -112,6 +112,33 @@ class Economy2(commands.Cog):
 
             await ctx.message.reply(embed=em)
             return
+
+    @commands.command(name='Baltop', description='Shows the Balance Leaderboard!', aliases=["bt"])
+    @commands.cooldown(1, 120, commands.BucketType.user)
+    async def baltop(self, ctx):
+        user = ctx.author
+        channel = ctx.channel.id
+        if ctx.channel.id == channel:
+            check = leveling.find_one({"id": user.id})
+            if check is None:
+                await ctx.message.reply(
+                    "You don't have a profile!\nPlease execute the `!create` command to create a profile!")
+                return
+            rankings = leveling.find().sort("money", -1)
+            i = 1
+            embed = discord.Embed(title="Top 10 Balances!")
+            for x in rankings:
+                try:
+                    temp = ctx.guild.get_member(x["id"])
+                    tempxp = x["money"]
+                    embed.add_field(name=f'{i}: {temp.name}', value=f'Total Money: {tempxp}', inline=False)
+                    i += 1
+                except:
+                    pass
+                if i == 11:
+                    break
+            await ctx.channel.send(embed=embed)
+
 
 
 def setup(bot):
