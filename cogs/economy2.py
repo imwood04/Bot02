@@ -98,7 +98,7 @@ class Economy2(commands.Cog):
 
         else:
 
-            job_names = ["Cashier", "McDonald's Worker", "Criminal", "Retail Worker", "Mechanic"]
+            job_names = ["Cashier", "McDonald's Worker", "Criminal", "Retail Worker", "Mechanic", "Art Commission"]
             job = random.choice(job_names)
 
             amount = random.randint(100, 1000)
